@@ -1,0 +1,11 @@
+{application, druuid,
+ [
+  {description, "NIF for UUID generation"},
+  {vsn, "0.0.1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {env, []}
+ ]}.
