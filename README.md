@@ -1,6 +1,6 @@
 ## Druuid
 
-### Overview
+## Overview
 
 An Erlang NIF wrapper around the
 [OSSP-UUID](http://www.ossp.org/pkg/lib/uuid/) library.
@@ -8,7 +8,7 @@ An Erlang NIF wrapper around the
 Currently only V4 UUIDs are supported, but support for other versions
 is coming.
 
-### Building
+## Building
 
 The druuid repo contains version 1.6.2 of the OSSP uuid libary. To
 build just clone the repo and type the following:
@@ -19,9 +19,9 @@ make
 </code>
 </pre>
 
-### Usage
+## Usage
 
-#### Generate a v4 uuid
+### Generate a v4 uuid
 
 <pre>
 <code>
