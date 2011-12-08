@@ -12,6 +12,8 @@ BASEDIR="$PWD"
 
 case "$1" in
     clean)
+        test -f uuid-$UUID_VSN/.libs/libuuid.a || exit 0
+
         (cd uuid-$UUID_VSN && \
             make distclean)
         ;;
