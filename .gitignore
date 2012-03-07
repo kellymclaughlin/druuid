@@ -1,2 +1,16 @@
+ebin/
+priv/
 .eunit
 *.o
+c_src/uuid*/Makefile
+c_src/uuid*/.libs
+c_src/uuid*/*.lo
+c_src/uuid*/config.h
+c_src/uuid*/config.log
+c_src/uuid*/config.status
+c_src/uuid*/libtool
+c_src/uuid*/libuuid.la
+c_src/uuid*/uuid
+c_src/uuid*/uuid-config
+c_src/uuid*/uuid.h
+c_src/uuid*/uuid.pc
