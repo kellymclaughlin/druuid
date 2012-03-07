@@ -28,6 +28,8 @@ static ErlNifResourceType* druuid_RESOURCE;
 // Prototypes
 static ERL_NIF_TERM druuid_uuid_v4(ErlNifEnv* env, int argc,
                                           const ERL_NIF_TERM argv[]);
+static ERL_NIF_TERM druuid_uuid_v4_str(ErlNifEnv* env, int argc,
+                                          const ERL_NIF_TERM argv[]);
 static ERL_NIF_TERM error_tuple(ErlNifEnv* env,
                                 ERL_NIF_TERM reason,
                                 uuid_rc_t rc);
@@ -42,11 +44,49 @@ static ERL_NIF_TERM ATOM_UUID_DESTROY_FAILED;
 
 static ErlNifFunc nif_funcs[] =
 {
-    {"v4", 0, druuid_uuid_v4}
+    {"v4", 0, druuid_uuid_v4},
+    {"v4_str", 0, druuid_uuid_v4_str}
 };
 
 static ERL_NIF_TERM druuid_uuid_v4(ErlNifEnv* env, int argc,
-                                          const ERL_NIF_TERM argv[])
+                                       const ERL_NIF_TERM argv[])
+{
+    uuid_t *uuid;
+    uuid_rc_t rc;
+    void *vp = NULL;
+    size_t n;
+
+    if ((rc = uuid_create(&uuid)) != UUID_RC_OK)
+    {
+        return error_tuple(env, ATOM_UUID_CREATE_FAILED, rc);
+    }
+
+    if ((rc = uuid_make(uuid, UUID_MAKE_V4)) != UUID_RC_OK)
+    {
+        return error_tuple(env, ATOM_UUID_MAKE_FAILED, rc);
+    }
+
+    if ((rc = uuid_export(uuid, UUID_FMT_BIN, &vp, &n)) != UUID_RC_OK)
+    {
+        return error_tuple(env, ATOM_UUID_EXPORT_FAILED, rc);
+    }
+
+    ERL_NIF_TERM value_bin;
+    unsigned char* value = enif_make_new_binary(env, UUID_LEN_BIN, &value_bin);
+    memcpy(value, vp, UUID_LEN_BIN);
+
+    free(vp);
+
+    if ((rc = uuid_destroy(uuid)) != UUID_RC_OK)
+    {
+        return error_tuple(env, ATOM_UUID_DESTROY_FAILED, rc);
+    }
+
+    return value_bin;
+}
+
+static ERL_NIF_TERM druuid_uuid_v4_str(ErlNifEnv* env, int argc,
+                                   const ERL_NIF_TERM argv[])
 {
     uuid_t *uuid;
     uuid_rc_t rc;

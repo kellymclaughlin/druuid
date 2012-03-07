@@ -25,7 +25,8 @@
 -export([v1/0,
          v2/0,
          v3/0,
-         v4/0]).
+         v4/0,
+         v4_str/0]).
 
 -on_load(init/0).
 
@@ -60,6 +61,9 @@ v3() ->
     erlang:nif_error({error, not_loaded}).
 
 v4() ->
+    erlang:nif_error({error, not_loaded}).
+
+v4_str() ->
     erlang:nif_error({error, not_loaded}).
 
 %% ===================================================================
