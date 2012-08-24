@@ -72,6 +72,7 @@ v4_str() ->
 -ifdef(TEST).
 
 basic_test() ->
-    ?assertEqual(36, size(v4())).
+    ?assertEqual(16, size(v4())),
+    ?assertEqual(36, size(v4_str())).
 
 -endif.
