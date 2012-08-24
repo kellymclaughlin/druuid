@@ -4,18 +4,16 @@ Config=[
 	{deps, [ ]},  
 	{deps_dir, "c_src"},  
 	{port_envs, [ 
-			%% Make sure to set -fPIC when compiling ossp-uuid 
 			{"CFLAGS", "$CFLAGS -fPIC"}, 
 			{"^bsd","DRV_CFLAGS", "$DRV_CFLAGS -Werror -I c_src/uuid-1,6,2"}, 
 			{"^bsd","DRV_LDFLAGS", "$DRV_LDFLAGS c_src/uuid-1,6,2/,libs/libuuid,a"}, 
-			%% BSD provides uuid_create natively
-			{"bsd","DRV_CFLAGS", "$DRV_CFLAGS -Werror"}, 
-		]},  
+			{"bsd","DRV_CFLAGS", "$DRV_CFLAGS -Werror"} 
+		]}  
 ],
 case rebar_utils:is_arch("bsd") of
 match ->
 	true;
-nomatch ->
-	Config1 = lists:keystore(pre_hooks, 1, Config, {pre_hooks, [{compile, "c_src/build_deps,sh"}]}),  
-	lists:keystore(post_hooks, 1, Config1, {post_hooks, [{clean, "c_src/build_deps,sh clean"}]})
+_ ->
+	Config1 = lists:keystore(pre_hooks, 1, Config, {pre_hooks, [{compile, "c_src/build_deps.sh"}]}),  
+	lists:keystore(post_hooks, 1, Config1, {post_hooks, [{clean, "c_src/build_deps.sh clean"}]})
 end.
