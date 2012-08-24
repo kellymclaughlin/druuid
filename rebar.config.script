@@ -1,0 +1,25 @@
+case rebar_utils:is_arch("bsd") of
+    true ->
+        [
+            {port_specs, [
+                    {"priv/druuid.so", ["c_src/*.c"]}
+                ]},
+            {port_env, [
+                    {"CFLAGS", "$CFLAGS -fPIC"},
+                    {"DRV_CFLAGS", "$DRV_CFLAGS -Werror"}
+            ]}
+    ];
+_ ->
+    [
+        {port_specs, [
+                {"priv/druuid.so", ["c_src/*.c"]}
+            ]},
+        {port_env, [
+                {"CFLAGS", "$CFLAGS -fPIC"},
+                {"DRV_CFLAGS", "$DRV_CFLAGS -Werror -I c_src/uuid-1.6.2"},
+                {"DRV_LDFLAGS", "$DRV_LDFLAGS c_src/uuid-1.6.2/.libs/libuuid.a"}
+        ]},
+    {pre_hooks, [{compile, "c_src/build_deps.sh"}]},
+    {post_hooks, [{clean, "c_src/build_deps.sh clean"}]}
+]
+end.
