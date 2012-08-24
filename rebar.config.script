@@ -1,31 +1,25 @@
-Config=[ 
-	{port_specs, [
-        {"priv/druuid.so", ["c_src/*.c"]}
-	]},
-	{port_envs, [ 
-			{"CFLAGS", "$CFLAGS -fPIC"} 
-		]}  
-],
-Addconf = fun(Config, {Name, Value}) when is_list(Value) ->
-		case lists:keytake(Name, 1, Config) of
-			{value, {Name, OldList}, _} when is_list(OldList) ->
-				lists:keystore(Name, 1, Config, {Name, lists:keymerge(1, OldList, Value)});
-			{value, {Name, OldVal}, _} ->
-				lists:keystore(Name, 1, Config, {Name, [ OldVal | Value ]});
-			_ -> 
-				lists:keystore(Name, 1, Config, {Name, Value})
-		end;
-	(Config, {Name, Value}) ->
-				lists:keystore(Name, 1, Config, {Name, Value})
-end,
 case rebar_utils:is_arch("bsd") of
-true ->
-	Addconf(Config, {port_envs, [{"DRV_CFLAGS", "$DRV_CFLAGS -Werror"}]});
+    true ->
+        [
+            {port_specs, [
+                    {"priv/druuid.so", ["c_src/*.c"]}
+                ]},
+            {port_env, [
+                    {"CFLAGS", "$CFLAGS -fPIC"},
+                    {"DRV_CFLAGS", "$DRV_CFLAGS -Werror"}
+            ]}
+    ];
 _ ->
-	Config1 = Addconf( Config, {pre_hooks, [{compile, "c_src/build_deps.sh"}]}),  
-	Config2 = Addconf( Config1, {post_hooks, [{clean, "c_src/build_deps.sh clean"}]}),
-	Addconf(Config2, {port_envs , [
-				            {"DRV_CFLAGS", "$DRV_CFLAGS -Werror -I c_src/uuid-1.6.2"},
-							{"DRV_LDFLAGS", "$DRV_LDFLAGS c_src/uuid-1.6.2/.libs/libuuid.a"}
-						]})
+    [
+        {port_specs, [
+                {"priv/druuid.so", ["c_src/*.c"]}
+            ]},
+        {port_env, [
+                {"CFLAGS", "$CFLAGS -fPIC"},
+                {"DRV_CFLAGS", "$DRV_CFLAGS -Werror -I c_src/uuid-1.6.2"},
+                {"DRV_LDFLAGS", "$DRV_LDFLAGS c_src/uuid-1.6.2/.libs/libuuid.a"}
+        ]},
+    {pre_hooks, [{compile, "c_src/build_deps.sh"}]},
+    {post_hooks, [{clean, "c_src/build_deps.sh clean"}]}
+]
 end.
