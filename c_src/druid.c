@@ -21,7 +21,19 @@
 *********************************************************************/
 
 #include "erl_nif.h"
+
+#if (defined(__unix__) || defined(unix)) && !defined(USG)
+#include <sys/param.h>
+#endif
+
+#if (defined(BSD) && (BSD >= 199306))
+#include <uuid.h>
+#include <string.h>
+#define  uuid_rc_t uint32_t
+#define USE_BSD_UUID
+#else 
 #include "uuid.h"
+#endif
 
 static ErlNifResourceType* druuid_RESOURCE;
 
@@ -30,6 +42,7 @@ static ERL_NIF_TERM druuid_uuid_v4(ErlNifEnv* env, int argc,
                                           const ERL_NIF_TERM argv[]);
 static ERL_NIF_TERM druuid_uuid_v4_str(ErlNifEnv* env, int argc,
                                           const ERL_NIF_TERM argv[]);
+
 static ERL_NIF_TERM error_tuple(ErlNifEnv* env,
                                 ERL_NIF_TERM reason,
                                 uuid_rc_t rc);
@@ -47,7 +60,52 @@ static ErlNifFunc nif_funcs[] =
     {"v4", 0, druuid_uuid_v4},
     {"v4_str", 0, druuid_uuid_v4_str}
 };
+#ifdef USE_BSD_UUID
+static ERL_NIF_TERM druuid_uuid_v4(ErlNifEnv* env, int argc,
+                                       const ERL_NIF_TERM argv[])
+{
 
+	struct uuid uuid;
+	uint32_t status;
+
+	uuid_create(&uuid, &status);
+	if (status != uuid_s_ok) {
+		return error_tuple(env, ATOM_UUID_CREATE_FAILED, status);
+	}
+
+	ERL_NIF_TERM value_bin;
+	unsigned char* value = enif_make_new_binary(env, sizeof(uuid), &value_bin);
+	memcpy(value, &uuid, sizeof(uuid));
+
+	return value_bin;
+
+}
+
+static ERL_NIF_TERM druuid_uuid_v4_str(ErlNifEnv* env, int argc,
+                                       const ERL_NIF_TERM argv[])
+{
+
+	uuid_t uuid;
+	uint32_t status;
+	char *str;
+
+	uuid_create(&uuid, &status);
+	if (status != uuid_s_ok) {
+		return error_tuple(env, ATOM_UUID_CREATE_FAILED, status);
+	}
+	uuid_to_string(&uuid, &str, &status);
+	if (status != uuid_s_ok) {
+		return error_tuple(env, ATOM_UUID_EXPORT_FAILED, status);
+	}
+
+	ERL_NIF_TERM value_bin;
+	unsigned char* value = enif_make_new_binary(env, strlen(str), &value_bin);
+	memcpy(value, str, strlen(str));
+
+	return value_bin;
+
+}
+#else
 static ERL_NIF_TERM druuid_uuid_v4(ErlNifEnv* env, int argc,
                                        const ERL_NIF_TERM argv[])
 {
@@ -121,6 +179,7 @@ static ERL_NIF_TERM druuid_uuid_v4_str(ErlNifEnv* env, int argc,
 
     return value_bin;
 }
+#endif
 
 static void druuid_resource_cleanup(ErlNifEnv* env, void* arg)
 {
